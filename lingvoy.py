@@ -216,12 +216,18 @@ class Linguee:
 
 		d_tag = site_soup.find(id = "dictionary")
 
+		dbg.debug(d_tag.prettify())
+
 		if d_tag is None:
 			dbg.printerr("Didn't find the result from dictionary")
 			return None
 
 		dictPage = None
-		for tag in d_tag.find_all(class_ = "isMainTerm"):
+		for tag in (d_tag.find_all(class_ = "isMainTerm") + d_tag.find_all(class_ = "isForeignTerm")):
+			
+			dbg.debug("Found a main term")
+			dbg.debug(tag.prettify())
+
 			if not BSH.hasAttr(tag, "data-source-lang", Languages.shortName[lang1]):
 				continue
 			# Found the right tag
@@ -229,6 +235,7 @@ class Linguee:
 
 		if dictPage is None:
 			# Din't find the right page
+			dbg.printerr("Didn't find the right page")
 			return None
 
 		results = []
@@ -243,6 +250,46 @@ class Linguee:
 		return results
 
 
+# definition of the lingvoy command
+from commands import ARG
+from commands import CMD
+
+# definitions of arguments
+
+ArgDict = dict()
+
+# checks whether str is a valid language name (valid language names are two-letter codes: EN, DE, ES etc.)
+def isLanguageCode(str):
+	return str in Languages.longName
+
+def isWord(str):
+	return str.isalpha()
+
+# *SourceLang
+ArgDict["slang"] = ARG("slang", ["from"], isLanguageCode, ARG.makeReader(["string"]))
+
+# *DestLang
+ArgDict["dlang"] = ARG("dlang", ["to", "into"], isLanguageCode, ARG.makeReader(["string"]))
+
+# *Word
+ArgDict["word"] = ARG("word", [ ], isWord, ARG.makeReader(["string"]))
+
+# Example -- list examples
+ArgDict["example"] = ARG("example", ["example", "usage", "sentence", "use", "context"], ARG.noVal, ARG.makeReader([]))
+
+# Translation -- show translations
+ArgDict["trans"] = ARG("trans", ["translate", "meaning", "means"], ARG.noVal, ARG.makeReader([]))
+
+# Grammar -- present grammarInfo
+ArgDict["grammar"] = ARG("grammar", ["grammar", "grammatic"], ARG.noVal, ARG.makeReader([]))
+
+# definition of the command
+# TODO: implement and test the command interface
+def execute(session, arguments):
+	return None
+
+
+Lingvoy = CMD("lingvoy", ArgDict, CMD.compulsoryArgs("word", "slang", "dlang"), execute)
 
 # for testing
 

@@ -199,6 +199,28 @@ class OWM:
 
 
 
+# definition of the vetero command
+
+import commands
+
+# definitions of arguments:
+
+
+# definition of the command
+
+def validate(arguments):
+	return True
+
+def parse(line):
+	return
+
+def recognize(line):
+	return False
+
+def execute(session, arguments):
+	return
+
+
 
 		
 
