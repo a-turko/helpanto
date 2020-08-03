@@ -5,3 +5,5 @@ Location types:
 ?q={city name},{state code},{country code}
 
 https://api.openweathermap.org/data/2.5/wheather?q=Wroclaw&appid=84825fbd278aa312f2f3d1b35db5fb98
+
+> lingvoy --slang EN --dlang DE --word nice --trans --example --grammar

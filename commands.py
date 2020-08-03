@@ -23,7 +23,7 @@ class ARG:
 				if valType=="float":
 					ret.append(float(values[start+i]))
 				if valType=="string":
-					ret.append(float(values[start+i]))
+					ret.append(str(values[start+i]))
 			
 			return ret
 		
@@ -39,13 +39,41 @@ class ARG:
 
 # class for representing a command
 class CMD:
-	def __init__(self, name, arguments, validate, recognize, execute):
+	
+	# try to recognize the command from the line, returns:
+	# a dictionary with recognized arguments in case of success
+	# None in case of failure
+	# TODO: implement
+	@staticmethod
+	def recognition(self, line):
+		return None
+
+
+	# creates a simple procedure for validation, which checks
+	# whether all the arguments from argList are present in ArgDict
+	@staticmethod
+	def compulsoryArgs(argList):
+		def validator(argDict):
+			for arg in argList:
+				if not arg in argDict: return False
+			return True
+		return validator
+
+	def __init__(self, name, arguments, validate, execute, recognize = None):
+		
+		# default values:
+		if recognize is None: recognize = CMD.recognition
+
 		self.name = name
 		self.arguments = arguments		# dictionary with ARG objects by name
 		self.validate = validate		# procedure foor checking validity of argument
 										# takes a dictionary with entries argname:argval
+
 		self.execute = execute			# procedure for executing a command, takes a Session object as an argument
 										# execute procedure takes a Session object and a dictionary with arguments
+
+		self.recognize =  recognize		# recognizes the command and its arguments from natural language, returns
+										# dictionary with arguments in case of success and None in case of failure
 
 	# checks whether the token is a name of a option proceeded by '--'
 	# if it's not returns None, and right ARG otherwise
@@ -75,24 +103,13 @@ class CMD:
 			vals = argument.read(tokens, i)
 			i+=len(vals)
 
-			argumentDict[argument.name] = vals
+			if argument.validate(vals):
+				argumentDict[argument.name] = vals
 			
 		return argumentDict
 	
 
-	# try to recognize the command from the line, returns:
-	# a dictionary with recognized arguments in case of success
-	# None in case of failure
-	# TODO: implement
-	def recognition(self, line):
-		return None
+	
 
 	
-	# creates a simple procedure for validation, which checks
-	# whether all the arguments from argList are present in ArgDict
-	@staticmethod
-	def compulsoryArgs(argList):
-		def validator(argDict):
-			for arg in argList:
-				if not arg in argDict: return False
-			return True
+	

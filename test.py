@@ -1,12 +1,7 @@
 
 
-def f1(b):
-	ret = [b, 5, 6, 7]
-	return ret
+D = { "hay":5, "steel":8, "wood":6 }
 
-
-l1 = f1(4)
-print(l1)
-l2 = f1(8)
-print(l2)
-print(l1)
+for key in D:
+	print(key)
+	print(D[key])

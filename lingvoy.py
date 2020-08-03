@@ -5,11 +5,12 @@
 import requests
 from bs4 import BeautifulSoup
 import debugtools as dbg
-import re
 
 class Languages:
-	shortName = { "english":"EN", "german":"DE", "spanish":"ES", "polish":"PL"}
-	longName = { "EN":"english", "DE":"german", "ES":"spanish", "PL":"polish"}
+	shortName = { "english":"EN", "german":"DE", "spanish":"ES", "polish":"PL", "french":"FR", \
+		"italian":"IT", "swedish":"SV"}
+	longName = { "EN":"english", "DE":"german", "ES":"spanish", "PL":"polish", "FR":"french",\
+		"IT":"italian", "SV":"swedish"}
 
 	dataType = {"noun": "wordType", "verb":"wordType", "adjective":"wordType", "adverb":"wordType", \
 		"preposition":"wordType", \
@@ -45,7 +46,7 @@ class Translation:
 		self.word = word
 		self.language = language
 		self.grammar = grammar
-		# list of pairs [example, its translations]
+		# list of pairs [example, its translation]
 		self.examples = examples
 		return
 
@@ -254,46 +255,107 @@ class Linguee:
 from commands import ARG
 from commands import CMD
 
-# definitions of arguments
+# definitions of arguments (mandatory arguments  are preceeded by *)
 
 ArgDict = dict()
 
 # checks whether str is a valid language name (valid language names are two-letter codes: EN, DE, ES etc.)
 def isLanguageCode(str):
-	return str in Languages.longName
+	return len(str)==1 and str[0] in Languages.longName
 
+# validator for word argument
 def isWord(str):
-	return str.isalpha()
+	return len(str)==1 and str[0].isalpha()
 
 # *SourceLang
 ArgDict["slang"] = ARG("slang", ["from"], isLanguageCode, ARG.makeReader(["string"]))
-
 # *DestLang
 ArgDict["dlang"] = ARG("dlang", ["to", "into"], isLanguageCode, ARG.makeReader(["string"]))
-
 # *Word
 ArgDict["word"] = ARG("word", [ ], isWord, ARG.makeReader(["string"]))
-
 # Example -- list examples
 ArgDict["example"] = ARG("example", ["example", "usage", "sentence", "use", "context"], ARG.noVal, ARG.makeReader([]))
-
 # Translation -- show translations
 ArgDict["trans"] = ARG("trans", ["translate", "meaning", "means"], ARG.noVal, ARG.makeReader([]))
-
 # Grammar -- present grammarInfo
 ArgDict["grammar"] = ARG("grammar", ["grammar", "grammatic"], ARG.noVal, ARG.makeReader([]))
+# Languages -- print information about the languages 
+ArgDict["lang"] = ARG("lang", [], ARG.noVal, ARG.makeReader([]))
 
 # definition of the command
 # TODO: implement and test the command interface
 def execute(session, arguments):
-	return None
+
+	dbg.debug("Executing lingvoy with args: ", arguments)
+
+	if session.weather is None:
+		dbg.debug("Setting a new dictionary")
+		session.weather = Linguee()
+	
+	slang = arguments["slang"][0]
+	source = Languages.longName[slang]
+	dlang = arguments["dlang"][0]
+	dest = Languages.longName[dlang]
+	word = arguments["word"][0]
+	resultList = session.weather.query(source, dest, word)
+
+	for result in resultList:
+		print(result.word, end = '')
+		if "lang" in arguments: 
+			print(" ({})".format(result.language), end = '')
+
+		if not result.wordType is None: 
+			print(" ({})".format(result.word, result.wordType), end = '')
+		
+
+		# print grammar info about the word
+		if "grammar" in arguments: 
+			first = True
+			for info in result.grammar:
+				if not first: print(',')
+				print(" {}: {}".format(info, result.grammar[info]), end = '')
+				first = False
+
+		print()
+		
+		# print the translations:
+
+		for translation in result.translations:
+
+			if "trans" in arguments:
+				print("  " + translation.word, end = '')
+
+				if "lang" in arguments:
+					print(" ({})".format(translation.language), end = '')
+				
+				if "grammar" in arguments and len(translation.grammar) > 0:
+					print(" (", end = '')
+					first = True
+					for info in translation.grammar:
+						if not first: print (", ", end = '')
+						print("{}: {}".format(info, translation.grammar[info]), end= '')
+					print(")", end = '')
+				
+				print()
+			
+			if "example" in arguments:
+				for example in translation.examples:
+					print("    " + example[0])
+
+					if "trans" in arguments:
+						print("    " + example[1])
+		
+
+	# finished execution with success
+	return True
 
 
-Lingvoy = CMD("lingvoy", ArgDict, CMD.compulsoryArgs("word", "slang", "dlang"), execute)
+Lingvoy = CMD("lingvoy", ArgDict, CMD.compulsoryArgs(["word", "slang", "dlang"]), execute)
 
 # for testing
 
 if __name__ == "__main__":
+
 
 	LG = Linguee()
 
