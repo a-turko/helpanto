@@ -2,12 +2,12 @@
 
 import debugtools as dbg
 from lingvoy import Lingvoy
-import vetero 
+from vetero import Vetero
 import commands
 
 # List of available commands:
 
-CMDList = [Lingvoy, ]
+CMDList = [Lingvoy, Vetero]
 
 # class for handling a user session
 class Session:
@@ -45,7 +45,7 @@ class Session:
 				return -1
 
 
-			print(command.validate)
+			#print(command.validate)
 
 			retcode = command.execute(self, arguments)
 			return retcode

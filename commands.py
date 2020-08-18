@@ -34,12 +34,30 @@ class ARG:
 	def noVal(value):
 		return len(value)==0
 
-				
+	# checks if the list str contains ln words
+	@staticmethod
+	def isWord(str, ln = 1):
+		if len(str) != ln: return False
+		for x in str:
+			if not x.isalpha(): return False
+		return True
+
+	# checks if the list str contains exactly ln integers
+	@staticmethod
+	def isInt(str, ln = 1):
+		if len(str) != len: return False
+		for x in str:
+			try:
+				y = int(x)
+			except ValueError:
+				return False
+		return True
 			
 
 # class for representing a command
 class CMD:
 	
+	# A default command recognition procedure
 	# try to recognize the command from the line, returns:
 	# a dictionary with recognized arguments in case of success
 	# None in case of failure

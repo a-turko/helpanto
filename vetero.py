@@ -73,7 +73,6 @@ class OWM:
 	APIKey = "84825fbd278aa312f2f3d1b35db5fb98"
 	APIUrl = "api.openweathermap.org"
 
-	# TODO: implement
 	# parsing location string to appropriate format for the https request
 	@staticmethod
 	def parseLocation(locationString):
@@ -136,7 +135,7 @@ class OWM:
 
 
 
-	# returns the WeatherInfo element
+	# returns a WeatherInfo object
 	def query(self, locationString, type = QueryType.DEFAULT):
 		
 		location = OWM.parseLocation(locationString)
@@ -157,7 +156,7 @@ class OWM:
 
 		retcod = JSON['cod']
 
-		if retcod is int:
+		if type(retcod) == int:
 			code = retcod
 		else:
 			code = int(retcod)
@@ -201,28 +200,74 @@ class OWM:
 
 # definition of the vetero command
 
-import commands
+from commands import ARG
+from commands import CMD
 
 # definitions of arguments:
+ArgDict = dict()
 
-
-# definition of the command
-
-def validate(arguments):
+def isTime(str):
+	if not ARG.isInt(str): return False
+	t = int(str[0])
+	if t<-1: return False
 	return True
 
-def parse(line):
-	return
+#*Location -- name of the city
+ArgDict["loc"] = ARG("loc", ["in"], ARG.isWord, ARG.makeReader(["string"]))
+#*Time -- time for which the information is requested, UNIX time, -1 neans now
+ArgDict["time"] = ARG("time", ["at", "on"], isTime, ARG.makeReader(["int"]))
+
+# Query aruments specifying type of requested information
+
+# All -- output all available information matching the given time and location 
+# (prints the dictionaries of the Weather object) -- for debugging purposes
+ArgDict["all"] = ARG("all", ["all", "everything"], ARG.noVal, ARG.makeReader([]))
+
+ArgDict["precip"] = ARG("precip", ["rain", "snow"], ARG.noVal, ARG.makeReader([]))
+# Temperature
+ArgDict["temp"] = ARG("temp", ["hot", "cold", "temperature"], ARG.noVal, ARG.makeReader([]))
+# Cloudiness 
+ArgDict["cloud"] = ARG("cloud", ["cloud", "cloudy"], ARG.noVal, ARG.makeReader([]))
+# Sunrise and sunset -- available only with time value equal -1
+ArgDict["sunrise"] = ARG("sunrise", ["sunrise", "sunlight", "day"], ARG.noVal, ARG.makeReader([]))
+ArgDict["sunset"] = ARG("sunset", ["sunset", "sunlight", "night", "dark"], ARG.noVal, ARG.makeReader([]))
+
+# General description of the weather
+ArgDict["desc"] = ARG("desc", [], ARG.noVal, ARG.makeReader([]))
+
+# definition of the command
 
 def recognize(line):
 	return False
 
+# TODO: implement
 def execute(session, arguments):
-	return
+
+	dbg.debug("Executing vetero with args: ", arguments)
+
+	if session.weather is None:
+			dbg.debug("Setting a new weather API manager")
+			session.weather = OWM()
+	
+
+	# modify the following lines when implementing new types of queries
+	if arguments["time"][0]==-1: qType = QueryType.CURRENT
+	else: qType = QueryType.SHORTFORECAST
+
+	locationString = "q={}".format(arguments["loc"])
+
+	wInfo = OWM.query(locationString, type = qType)
+
+	# just print the whole information
+	if "all" in arguments:
+		wInfo.debug()
+		return True
+
+	#executed successfuly
+	return True
 
 
-
-		
+Vetero = CMD("vetero", ArgDict, CMD.compulsoryArgs(["loc", "time"]), execute, recognize = None)
 
 # for testing
 
