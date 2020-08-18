@@ -3,6 +3,7 @@
 # handles searching for translations, example usage and such
 
 import requests
+from bs4 import element as bs4element
 from bs4 import BeautifulSoup
 import debugtools as dbg
 
@@ -103,15 +104,21 @@ class Linguee:
 		
 		wordInfo = header.find(href = True)
 		if wordInfo is None:
-			dbg.printerr("Failed to find the translated word")
+			dbg.printerr("Failed to find the translated word (WordInfo)")
 			return None
 		
-		word = wordInfo.string
+		word = None
+		for w in wordInfo.children:
+			if type(w)==bs4element.NavigableString and (word is None or len(word) < len(str(w))):
+				word = str(w)
+		
+
 		if word is None:
-			dbg.printerr("Failed to read the translated word")
+			dbg.printerr("Failed to read the translated word(word)")
+			dbg.printerr(wordInfo.prettify())
 			return None
 		
-		word = str(word)
+
 		
 		grammarInfo = header.find(title = True)
 		grammar = dict()
@@ -153,7 +160,16 @@ class Linguee:
 			return None
 		
 		word = strings[0]
-		wordType = strings[1]
+		wordType = ""
+
+		# identifying a word type
+		for s in strings[1:]:
+			if len(wordType)==0: wordType = s
+			elif (not wordType in Languages.dataType or Languages.dataType[wordType]!="wordType"):
+				if s in Languages.dataType and Languages.dataType[s]=="wordType":
+					wordType = s
+		
+
 
 		# Collect translations
 
@@ -217,7 +233,7 @@ class Linguee:
 
 		d_tag = site_soup.find(id = "dictionary")
 
-		dbg.debug(d_tag.prettify())
+		#dbg.debug(d_tag.prettify())
 
 		if d_tag is None:
 			dbg.printerr("Didn't find the result from dictionary")
@@ -226,8 +242,8 @@ class Linguee:
 		dictPage = None
 		for tag in (d_tag.find_all(class_ = "isMainTerm") + d_tag.find_all(class_ = "isForeignTerm")):
 			
-			dbg.debug("Found a main term")
-			dbg.debug(tag.prettify())
+			#dbg.debug("Found a main term")
+			#dbg.debug(tag.prettify())
 
 			if not BSH.hasAttr(tag, "data-source-lang", Languages.shortName[lang1]):
 				continue
@@ -263,16 +279,13 @@ ArgDict = dict()
 def isLanguageCode(str):
 	return len(str)==1 and str[0] in Languages.longName
 
-# validator for word argument
-def isWord(str):
-	return len(str)==1 and str[0].isalpha()
 
 # *SourceLang
 ArgDict["slang"] = ARG("slang", ["from"], isLanguageCode, ARG.makeReader(["string"]))
 # *DestLang
 ArgDict["dlang"] = ARG("dlang", ["to", "into"], isLanguageCode, ARG.makeReader(["string"]))
 # *Word
-ArgDict["word"] = ARG("word", [ ], isWord, ARG.makeReader(["string"]))
+ArgDict["word"] = ARG("word", [ ], ARG.isWord, ARG.makeReader(["string"]))
 # Example -- list examples
 ArgDict["example"] = ARG("example", ["example", "usage", "sentence", "use", "context"], ARG.noVal, ARG.makeReader([]))
 # Translation -- show translations
@@ -281,23 +294,30 @@ ArgDict["trans"] = ARG("trans", ["translate", "meaning", "means"], ARG.noVal, AR
 ArgDict["grammar"] = ARG("grammar", ["grammar", "grammatic"], ARG.noVal, ARG.makeReader([]))
 # Languages -- print information about the languages 
 ArgDict["lang"] = ARG("lang", [], ARG.noVal, ARG.makeReader([]))
+# Print all the information
+ArgDict["all"] = ARG("all", [], ARG.noVal, ARG.makeReader([]))
 
 # definition of the command
-# TODO: implement and test the command interface
+# TODO: test the command interface
 def execute(session, arguments):
 
 	dbg.debug("Executing lingvoy with args: ", arguments)
 
-	if session.weather is None:
+	if "all" in arguments:
+		for name in ArgDict:
+			if ArgDict[name].validate is ARG.noVal and not name in arguments:
+				arguments[name] = []
+
+	if session.languages is None:
 		dbg.debug("Setting a new dictionary")
-		session.weather = Linguee()
+		session.languages = Linguee()
 	
 	slang = arguments["slang"][0]
 	source = Languages.longName[slang]
 	dlang = arguments["dlang"][0]
 	dest = Languages.longName[dlang]
 	word = arguments["word"][0]
-	resultList = session.weather.query(source, dest, word)
+	resultList = session.languages.query(source, dest, word)
 
 	for result in resultList:
 		print(result.word, end = '')
@@ -305,7 +325,7 @@ def execute(session, arguments):
 			print(" ({})".format(result.language), end = '')
 
 		if not result.wordType is None: 
-			print(" ({})".format(result.word, result.wordType), end = '')
+			print(" ({})".format(result.wordType), end = '')
 		
 
 		# print grammar info about the word
@@ -333,6 +353,7 @@ def execute(session, arguments):
 					first = True
 					for info in translation.grammar:
 						if not first: print (", ", end = '')
+						first = False
 						print("{}: {}".format(info, translation.grammar[info]), end= '')
 					print(")", end = '')
 				
@@ -350,7 +371,7 @@ def execute(session, arguments):
 	return True
 
 
-Lingvoy = CMD("lingvoy", ArgDict, CMD.compulsoryArgs(["word", "slang", "dlang"]), execute)
+Lingvoy = CMD("lingvoy", ArgDict, CMD.compulsoryArgs(["word", "slang", "dlang"]), execute, recognize = None)
 
 # for testing
 
