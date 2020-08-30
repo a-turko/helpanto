@@ -1,3 +1,6 @@
+
+import debugtools as dbg
+
 # definitions of command classes
 # module for command recognition from natural language will be added here
 
@@ -44,13 +47,10 @@ class ARG:
 
 	# checks if the list str contains exactly ln integers
 	@staticmethod
-	def isInt(str, ln = 1):
-		if len(str) != len: return False
-		for x in str:
-			try:
-				y = int(x)
-			except ValueError:
-				return False
+	def isInt(vals, ln = 1):
+		if len(vals) != ln: return False
+		for x in vals:
+			if type(x)!=int: return False
 		return True
 			
 
@@ -98,6 +98,7 @@ class CMD:
 	def option (self, token):
 		if len(token)<3 or token[0]!='-' or token[1]!='-': return None
 		option = token.lstrip('-')
+
 		if option in self.arguments: return self.arguments[option]
 		else: return None
 
@@ -113,13 +114,17 @@ class CMD:
 		i = 1
 		while i <len(tokens):
 			token = tokens[i]
+
 			i+=1
 			argument = self.option(token)
+			
 			if argument is None:
 				continue
 			
+			
 			vals = argument.read(tokens, i)
 			i+=len(vals)
+
 
 			if argument.validate(vals):
 				argumentDict[argument.name] = vals

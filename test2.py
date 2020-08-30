@@ -1,5 +1,9 @@
 
-def function(klasa):
-	if klasa.member is None:
-		klasa.member = 5
-	return
+import datetime as dt
+
+delta = dt.timedelta(days = 3)
+
+def function():
+	return delta
+
+print(delta.days)
