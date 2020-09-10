@@ -1,6 +1,5 @@
 
-# lingvoj -- a language helper module:
-# handles searching for translations, example usage and such
+# This module implements the lingvoy command for handling translations
 
 import requests
 from bs4 import element as bs4element
@@ -281,21 +280,69 @@ def isLanguageCode(str):
 
 
 # *SourceLang
-ArgDict["slang"] = ARG("slang", ["from"], isLanguageCode, ARG.makeReader(["string"]))
+ArgDict["slang"] = ARG("slang", isLanguageCode, ARG.makeReader(["string"]))
 # *DestLang
-ArgDict["dlang"] = ARG("dlang", ["to", "into"], isLanguageCode, ARG.makeReader(["string"]))
+ArgDict["dlang"] = ARG("dlang", isLanguageCode, ARG.makeReader(["string"]))
 # *Word
-ArgDict["word"] = ARG("word", [ ], ARG.isWord, ARG.makeReader(["string"]))
+ArgDict["word"] = ARG("word", ARG.isWord, ARG.makeReader(["string"]))
 # Example -- list examples
-ArgDict["example"] = ARG("example", ["example", "usage", "sentence", "use", "context"], ARG.noVal, ARG.makeReader([]))
+ArgDict["example"] = ARG("example", ARG.noVal, ARG.makeReader([]))
 # Translation -- show translations
-ArgDict["trans"] = ARG("trans", ["translate", "meaning", "means"], ARG.noVal, ARG.makeReader([]))
+ArgDict["trans"] = ARG("trans", ARG.noVal, ARG.makeReader([]))
 # Grammar -- present grammarInfo
-ArgDict["grammar"] = ARG("grammar", ["grammar", "grammatic"], ARG.noVal, ARG.makeReader([]))
+ArgDict["grammar"] = ARG("grammar", ARG.noVal, ARG.makeReader([]))
 # Languages -- print information about the languages 
-ArgDict["lang"] = ARG("lang", [], ARG.noVal, ARG.makeReader([]))
+ArgDict["lang"] = ARG("lang", ARG.noVal, ARG.makeReader([]))
 # Print all the information
-ArgDict["all"] = ARG("all", [], ARG.noVal, ARG.makeReader([]))
+ArgDict["all"] = ARG("all", ARG.noVal, ARG.makeReader([]))
+
+
+# data for command recognition
+
+# tries to recognize a language code
+def langCode(tokens, start):
+	if start >= len(tokens):
+		return None
+	
+	if tokens[start] in Languages.shortName:
+		return Languages.shortName[tokens[start]]
+	
+	code = tokens[start].upper()
+
+	if code in Languages.longName:
+		return code
+	
+	return None
+
+ArgDict["slang"].setIndicators(["from", "in"])
+ArgDict["slang"].setValueAliases([langCode])
+ArgDict["slang"].hasRecognitionData = True
+
+ArgDict["dlang"].setIndicators(["to"])
+ArgDict["dlang"].setValueAliases([langCode])
+ArgDict["dlang"].hasRecognitionData = True
+
+ArgDict["word"].setIndicators(["translate", "word"])
+ArgDict["word"].setValueAliases([])
+ArgDict["word"].hasRecognitionData = True
+
+ArgDict["example"].setIndicators(["example", "usage", "sentence", "context"])
+ArgDict["example"].setValueAliases([])
+ArgDict["example"].hasRecognitionData = True
+
+ArgDict["trans"].setIndicators(["translate", "translation", "mean", "meaning"])
+ArgDict["trans"].setValueAliases([])
+ArgDict["trans"].hasRecognitionData = True
+
+ArgDict["grammar"].setIndicators(["grammar"])
+ArgDict["grammar"].setValueAliases([])
+ArgDict["grammar"].hasRecognitionData = True
+
+def autofill(argDict):
+	if not "dlang" in argDict:
+		argDict["dlang"] = "EN"
+	if not "slang" in argDict:
+		argDict["slang"] = "EN"
 
 # definition of the command
 # TODO: test the command interface
@@ -371,7 +418,10 @@ def execute(session, arguments):
 	return True
 
 
-Lingvoy = CMD("lingvoy", ArgDict, CMD.compulsoryArgs(["word", "slang", "dlang"]), execute, recognize = None)
+Lingvoy = CMD("lingvoy", ArgDict, CMD.compulsoryArgs(["word", "slang", "dlang"]), execute, customRecognize = None)
+Lingvoy.setKeywords(["translate", "translation", "mean", "means", "meaning", "useage", "sentence", "context", "grammar"])
+Lingvoy.setAutofill(autofill)
+
 
 # for testing
 
