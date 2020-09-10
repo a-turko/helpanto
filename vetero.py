@@ -1,5 +1,5 @@
-# vetero -- a weather data module
-# handles weather data using OpenWeatherMap API guide
+# A vetero command implementation, weather quries
+# handles weather data using OpenWeatherMap API
 
 from enum import Enum
 import debugtools as dbg
@@ -250,23 +250,23 @@ ArgDict["time"] = ARG("time", ["at", "on"], isTime, ARG.makeReader(["int"]))
 
 # All -- output all available information matching the given time and location 
 # (prints the dictionaries of the Weather object) -- for debugging purposes, but prints to stdout
-ArgDict["all"] = ARG("all", ["all", "everything"], ARG.noVal, ARG.makeReader([]))
+ArgDict["all"] = ARG("all",ARG.noVal, ARG.makeReader([]))
 
-ArgDict["precip"] = ARG("precip", ["rain", "snow"], ARG.noVal, ARG.makeReader([]))
+ArgDict["precip"] = ARG("precip", ARG.noVal, ARG.makeReader([]))
 # Temperature
-ArgDict["temp"] = ARG("temp", ["hot", "cold", "temperature"], ARG.noVal, ARG.makeReader([]))
+ArgDict["temp"] = ARG("temp", ARG.noVal, ARG.makeReader([]))
 # Cloudiness 
-ArgDict["cloud"] = ARG("cloud", ["cloud", "cloudy"], ARG.noVal, ARG.makeReader([]))
+ArgDict["cloud"] = ARG("cloud", ARG.noVal, ARG.makeReader([]))
 # Sunrise and sunset -- available only with time value equals -1
-ArgDict["sunrise"] = ARG("sunrise", ["sunrise", "sunlight", "day"], ARG.noVal, ARG.makeReader([]))
-ArgDict["sunset"] = ARG("sunset", ["sunset", "sunlight", "night", "dark"], ARG.noVal, ARG.makeReader([]))
-ArgDict["wind"] = ARG("wind", ["wind", "windy"], ARG.noVal, ARG.makeReader([]))
+ArgDict["sunrise"] = ARG("sunrise", ARG.noVal, ARG.makeReader([]))
+ArgDict["sunset"] = ARG("sunset", ARG.noVal, ARG.makeReader([]))
+ArgDict["wind"] = ARG("wind", ARG.noVal, ARG.makeReader([]))
 
 # duration of the timespan in hours that we want to get information about, if not specified 0 is assumed
-ArgDict["duration"] = ARG("duration", ["for"], ARG.isInt, ARG.makeReader(["int"]))
+ArgDict["duration"] = ARG("duration", ARG.isInt, ARG.makeReader(["int"]))
 
 # General description of the weather
-ArgDict["desc"] = ARG("desc", [], ARG.noVal, ARG.makeReader([]))
+ArgDict["desc"] = ARG("desc", ARG.noVal, ARG.makeReader([]))
 
 # definition of the command
 
@@ -425,9 +425,3 @@ if __name__ == "__main__":
 	#forecast = API.query("q=Meghalaya", QueryType.LONGFORECAST)
 	#current.debug()
 	#forecast.debug()
-
-
-
-
-
-		
