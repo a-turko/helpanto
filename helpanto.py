@@ -40,17 +40,33 @@ class Session:
 					command = cmd
 					arguments = argDict
 
-			if command is None:
-				dbg.debug("No command rezognized")
-				return -1
+			
 
 
 			#print(command.validate)
 
-			retcode = command.execute(self, arguments)
-			return retcode
 			
+			
+		# command recognition mode
+		else:
+
+			command  = None
+			for cmd in CMDList:
+				argDict = cmd.regonize(line)
+				
+				if argDict is None:
+					continue
+				command = cmd
+				arguments = argDict
+
+
+		if command is None:
+				dbg.debug("No command rezognized")
+				return -1
 		
+		retcode = command.execute(self, arguments)
+		return retcode
+	
 
 		dbg.debug("Unsupported mode")
 		return -1

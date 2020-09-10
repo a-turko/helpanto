@@ -111,6 +111,8 @@ class CMD:
 
 		self.customRecognize =  customRecognize		# a custom procedure for recognition of this procedure, see recognize
 
+		self.autofill = None			# auto fill the arguments
+
 	# keywords is a list of keywords by which the command can be recognized
 	# self.keywords stores the keywords in a set
 	def setKeywords(self, keywords):
@@ -184,6 +186,9 @@ class CMD:
 			# TODO: change this temporary solution
 			argDict[argName] = pVals[0]
 		
+		if not self.autofill is None:
+			self.autofill(argDict)
+
 		if self.validate(argDict): 
 			return argDict
 		else:
