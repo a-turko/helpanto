@@ -42,7 +42,6 @@ class Session:
 
 			
 
-
 			#print(command.validate)
 
 			
@@ -73,9 +72,11 @@ class Session:
 		
 
 
-# for testing
 
 if __name__=="__main__":
+
+	dbg.debug(Lingvoy.keywords)
+	dbg.debug(Vetero.keywords)
 
 	session = Session()
 	print("Avaiting commands")

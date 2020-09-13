@@ -305,12 +305,12 @@ def langCode(tokens, start):
 		return None
 	
 	if tokens[start] in Languages.shortName:
-		return Languages.shortName[tokens[start]]
+		return [Languages.shortName[tokens[start]]]
 	
 	code = tokens[start].upper()
 
 	if code in Languages.longName:
-		return code
+		return [code]
 	
 	return None
 
@@ -318,11 +318,11 @@ ArgDict["slang"].setIndicators(["from", "in"])
 ArgDict["slang"].setValueAliases([langCode])
 ArgDict["slang"].hasRecognitionData = True
 
-ArgDict["dlang"].setIndicators(["to"])
+ArgDict["dlang"].setIndicators(["to", "into"])
 ArgDict["dlang"].setValueAliases([langCode])
 ArgDict["dlang"].hasRecognitionData = True
 
-ArgDict["word"].setIndicators(["translate", "word"])
+ArgDict["word"].setIndicators(["translate", "word", "for", "of"])
 ArgDict["word"].setValueAliases([])
 ArgDict["word"].hasRecognitionData = True
 
@@ -340,9 +340,9 @@ ArgDict["grammar"].hasRecognitionData = True
 
 def autofill(argDict):
 	if not "dlang" in argDict:
-		argDict["dlang"] = "EN"
+		argDict["dlang"] = ["EN"]
 	if not "slang" in argDict:
-		argDict["slang"] = "EN"
+		argDict["slang"] = ["EN"]
 
 # definition of the command
 # TODO: test the command interface
@@ -419,7 +419,7 @@ def execute(session, arguments):
 
 
 Lingvoy = CMD("lingvoy", ArgDict, CMD.compulsoryArgs(["word", "slang", "dlang"]), execute, customRecognize = None)
-Lingvoy.setKeywords(["translate", "translation", "mean", "means", "meaning", "useage", "sentence", "context", "grammar"])
+Lingvoy.setKeywords(["translate", "translation", "mean", "means", "meaning", "usage", "sentence", "context", "grammar"])
 Lingvoy.setAutofill(autofill)
 
 

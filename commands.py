@@ -12,7 +12,7 @@ class ARG:
 		self.validate = validate		# procedure for checking whether the value is valid
 		self.read = read				# read values of the arguments from tokens, takes list of tokens as argument
 										# returns the number of tokens read
-		self.hasRecognitionData = False # true iff the instance has valueAliases and indicators defined
+		self.hasRecognitionData = False # true iff the instance has valueAliases, indicators and contextScanners
 
 	# valueAliases is a list of procedures for translating
 	# possible values to standard ones (as ARG.read would return them)
@@ -30,6 +30,8 @@ class ARG:
 		if not self.hasRecognitionData:
 			return []
 		
+		dbg.debug("Scanning for ", self.name)
+
 		ret = []
 		ln = len(tokens)
 		for i in range(ln):
@@ -39,7 +41,9 @@ class ARG:
 				val = proc(tokens, i+1)
 				if not val is None and self.validate(val):
 					ret.append(val)
-			
+		
+
+		dbg.debug("For", self.name, "found", ret)
 		return ret
 
 
@@ -50,13 +54,21 @@ class ARG:
 	@staticmethod
 	def makeReader(valTypes):
 		def reader(values, start):
-			if start + len(valTypes) > len(values)):
+			if start + len(valTypes) > len(values):
 				return None
 			
 			ret = []
 			for i,valType in enumerate(valTypes):
-				if valType=="int": ret.append(int(values[start+i]))
-				if valType=="float": ret.append(float(values[start+i]))
+				if valType=="int": 
+					try:
+						ret.append(int(values[start+i]))
+					except ValueError:
+						return None
+				if valType=="float": 
+					try:
+						ret.append(float(values[start+i]))
+					except ValueError:
+						return None
 				if valType=="string": ret.append(str(values[start+i]))
 			
 			return ret
@@ -112,6 +124,7 @@ class CMD:
 		self.customRecognize =  customRecognize		# a custom procedure for recognition of this procedure, see recognize
 
 		self.autofill = None			# auto fill the arguments
+		self.keywords = set()
 
 	# keywords is a list of keywords by which the command can be recognized
 	# self.keywords stores the keywords in a set
@@ -120,7 +133,7 @@ class CMD:
 	
 	# set the autofill procedure which takes only one argument
 	# the argict and possibly modyfies it by filling in default argument values
-	def setAutofill(autofill):
+	def setAutofill(self, autofill):
 		self.autofill = autofill
 
 	# checks whether the token is a name of a option proceeded by '--'
@@ -168,11 +181,14 @@ class CMD:
 	# on failure returns None
 	# For now operates on limited set of keywords
 	def regonize(self, line):
-		tokens = re.split(" |?|,|.", line.lower())
+		tokens = re.split(r" |\?|,|\.", line.lower())
 		keywordFound = False
 		for token in tokens:
-			if token in keywords: keywordFound = True
+			if token in self.keywords: keywordFound = True
 		
+		dbg.debug(tokens, re.split(line.lower(), " "))
+		dbg.debug("Scanned for ", self.name, ", keywords:", keywordFound)
+
 		if not keywordFound: return None
 
 		argDict = dict()
@@ -180,7 +196,7 @@ class CMD:
 		for argName in self.arguments:
 			arg = self.arguments[argName]
 
-			pVals = arg.scanForValues
+			pVals = arg.scanForValues(tokens)
 			if len(pVals)==0: continue
 
 			# TODO: change this temporary solution
