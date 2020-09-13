@@ -211,22 +211,15 @@ class Linguee:
 		# Get the site
 
 		url = self.get_url(lang1, lang2, word)
-		print(url)
 
+		dbg.debug(url)
+		
 		try:
 			response = requests.get(url, timeout=5)
 		except requests.exceptions.Timeout:
 			dbg.printerr("The connection has timed out")
 		
 		site_soup = BeautifulSoup(response.content, "html.parser")
-		
-
-		# DEBUG
-		site = open("site.html", 'w')
-
-		print(site_soup.prettify(), file = site)
-		site.close()
-		# END OF DEBUG
 
 		# Search the dictionary
 

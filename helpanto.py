@@ -41,7 +41,8 @@ class Session:
 					arguments = argDict
 
 			
-
+			if command is None:
+				print("The command has not been recognized, it may be not properly structured or unsupported.", flush = True)
 			#print(command.validate)
 
 			
@@ -58,12 +59,15 @@ class Session:
 				command = cmd
 				arguments = argDict
 
+			if command is None:
+				print("I didn't quite understand. Please rephrase.", flush = True)
 
 		if command is None:
 				dbg.debug("No command rezognized")
 				return -1
 		
 		retcode = command.execute(self, arguments)
+		print(end = '', flush = True)
 		return retcode
 	
 
@@ -75,11 +79,8 @@ class Session:
 
 if __name__=="__main__":
 
-	dbg.debug(Lingvoy.keywords)
-	dbg.debug(Vetero.keywords)
-
 	session = Session()
-	print("Avaiting commands")
+	print("Avaiting commands", flush = True)
 
 
 
