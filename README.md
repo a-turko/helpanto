@@ -11,21 +11,26 @@ The syntax is as follows: "> command [options...]". Some options take vales, in 
 ## lingvoy 
 This command provides translation services in helpanto. It uses translations from linguee.com.
 
-``--word <word>``
- 
+--word <word>
+
 	Mandatory argument, the word to be translated.
-``--slang <language code>``
+	
+--slang <language code>
 
 	Mandatory argument, source language of the word. Language code consists of two uppercase letters, so EN for English and SV for Swedish.
+	
 ``--dlang <language code>``
 
 	Mandatory argument, language the word and examples will be translated to. Values as in ``--slang``.
+	
 ``--example``
 
 	Procide examples of usage. If ``--trans`` is specified, translation of those examples will also be provided.
+	
 ``--trans``
 
 	Translate the word.
+	
 ``--grammar``
 
 	Provide available grammar information about the word.
@@ -55,7 +60,7 @@ Command providing weather information. It uses data from OpenWeatherMap (openwea
 	
 ``--sunrise`` and ``--sunset``
 
-	Provide information about sunrise and sunset accordingly. Work only with ``--time value = -1.
+	Provide information about sunrise and sunset accordingly. Takes effect only with ``--time value = -1.
 	
 ``--wind``
 
