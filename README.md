@@ -9,7 +9,7 @@ For more precision you can use the command mode, in which the command has to pro
 The syntax is as follows: "``>`` command [options...]". Some options take vales, in such a case those should be given after the option name. All option names must be proceded with "``--``" prefix.
 
 ## lingvoy 
-This command provides translation services in helpanto. 
+This command provides translation services in helpanto. It uses translations from linguee.com.
 
 ``--``word ``<``word``>`` 
 	Mandatory argument, the word to be translated.
@@ -25,7 +25,7 @@ This command provides translation services in helpanto.
 	Provide available grammar information about the word.
 
 ## vetero
-Command providing weather information.
+Command providing weather information. It uses data from OpenWeatherMap (openweathermap.org).
 
 ``--``loc ``<``city``>``
 	Mandatory argument, location for the weather information.
