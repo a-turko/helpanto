@@ -13,7 +13,7 @@ This command provides translation services in helpanto. It uses translations fro
 
 --word <word>
 
-	Mandatory argument, the word to be translated.
+Mandatory argument, the word to be translated.
 	
 --slang <language code>
 
