@@ -239,12 +239,13 @@ def isTime(vals):
 		return False
 	t = vals[0]
 	if t<-1: return False
+	if t< 30*24*60*60: return False
 	return True
 
 #*Location -- name of the city
-ArgDict["loc"] = ARG("loc", ["in"], ARG.isWord, ARG.makeReader(["string"]))
+ArgDict["loc"] = ARG("loc", ARG.isWord, ARG.makeReader(["string"]))
 #*Time -- time for which the information is requested, UNIX time, -1 neans now
-ArgDict["time"] = ARG("time", ["at", "on"], isTime, ARG.makeReader(["int"]))
+ArgDict["time"] = ARG("time", isTime, ARG.makeReader(["int"]))
 
 # Query aruments specifying type of requested information
 
@@ -262,17 +263,98 @@ ArgDict["sunrise"] = ARG("sunrise", ARG.noVal, ARG.makeReader([]))
 ArgDict["sunset"] = ARG("sunset", ARG.noVal, ARG.makeReader([]))
 ArgDict["wind"] = ARG("wind", ARG.noVal, ARG.makeReader([]))
 
-# duration of the timespan in hours that we want to get information about, if not specified 0 is assumed
+# duration of the timespan in hours that we want to get information about, if not specified 0 is assumed (in command recognition 3 h)
+# meaning full only if time is not equal -1
 ArgDict["duration"] = ARG("duration", ARG.isInt, ARG.makeReader(["int"]))
 
 # General description of the weather
 ArgDict["desc"] = ARG("desc", ARG.noVal, ARG.makeReader([]))
 
+# data for command recognition
+
+def timeKeywords(tokens, start):
+	if start <=0 or start >= len(tokens):
+		return None
+	
+	nowIndicators = ["now", "currently"]
+	if tokens[start-1] in nowIndicators:
+		return [-1]
+	
+	futureIndicators = ["will"]
+	if tokens[start-1] in futureIndicators:
+		return [tempo.getCurrentTimestamp() + 10 * 60]
+
+
+	return None
+
+NumberDict = { "one":1, "two":2, "three":3, "four":4, "five":5, "six":6, "seven":7, "eight":8, \
+				"nine":9, "ten":10, "half":0.5, "fifteen":15, "twenty":20, "thirty":30}
+
+def timeFromNow(tokens, start):
+	if start >= len(tokens):
+		return None
+	
+	offsetval = None
+	offsettype = None
+	if tokens[start] in NumberDict:
+		offsetval = NumberDict[tokens[start]]
+	if tokens[start].isnumeric():
+		offsetval = int(tokens[start])
+	
+	for i in range(start+1,min(start+3, len(tokens))):
+		if tokens[i]=="hours" or tokens[i]=="hour":
+			offsettype = 60 * 60
+		if tokens[i]=="minutes" or tokens[i]=="minute":
+			offsettype = 60
+	
+	if offsetval is None or offsettype is None:
+		return None
+	
+	return [tempo.getCurrentTimestamp() + offsettype * offsetval]
+
+
+ArgDict["loc"].setIndicators(["in", "near"])
+ArgDict["loc"].setValueAliases([])
+ArgDict["loc"].hasRecognitionData = True
+
+ArgDict["time"].setIndicators(["in", "now", "currently"])
+ArgDict["time"].setValueAliases([timeFromNow])
+ArgDict["time"].hasRecognitionData = True
+
+ArgDict["precip"].setIndicators(["precipitation", "rain", "snow", "raining", "snowing", "rainy", "snowy"])
+ArgDict["precip"].setValueAliases([])
+ArgDict["precip"].hasRecognitionData = True
+
+ArgDict["temp"].setIndicators(["warm", "cold", "temperature", "hot", "chilly"])
+ArgDict["temp"].setValueAliases([])
+ArgDict["temp"].hasRecognitionData = True
+
+ArgDict["cloud"].setIndicators(["cloud", "cloudiness", "clouds"])
+ArgDict["cloud"].setValueAliases([])
+ArgDict["cloud"].hasRecognitionData = True
+
+ArgDict["sunrise"].setIndicators(["sunrise", "sun", "morning", "sunlight"])
+ArgDict["sunrise"].setValueAliases([])
+ArgDict["sunrise"].hasRecognitionData = True
+
+ArgDict["sunset"].setIndicators(["sunset", "sun", "night", "evening", "sunlight"])
+ArgDict["sunset"].setValueAliases([])
+ArgDict["sunset"].hasRecognitionData = True
+
+ArgDict["wind"].setIndicators(["wind", "windy"])
+ArgDict["wind"].setValueAliases([])
+ArgDict["wind"].hasRecognitionData = True
+
+
+def autofill(argDict):
+	if not "time" in argDict:
+		argDict["time"] = [-1]
+	if not "duration" in argDict:
+		argDict["duration"] = [3]
+	if not "desc" in argDict:
+		argDict["desc"] = []
+
 # definition of the command
-
-
-def recognize(line):
-	return False
 
 def _getValue(dictionary, key):
 	if key in dictionary:
@@ -413,7 +495,10 @@ def execute(session, arguments):
 	return True
 
 
-Vetero = CMD("vetero", ArgDict, CMD.compulsoryArgs(["loc", "time"]), execute, recognize = None)
+Vetero = CMD("vetero", ArgDict, CMD.compulsoryArgs(["loc", "time"]), execute, customRecognize = None)
+Vetero.setKeywords(["weather", "rain", "raining", "rainy", "snow", "wind", "windy", "temperature", "hot", \
+					"warm", "cold", "clouds", "cloudy"])
+Vetero.setAutofill(autofill)
 
 # for testing
 
