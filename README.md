@@ -17,59 +17,59 @@ Mandatory argument, the word to be translated.
 	
 --slang <language code>
 
-	Mandatory argument, source language of the word. Language code consists of two uppercase letters, so EN for English and SV for Swedish.
+Mandatory argument, source language of the word. Language code consists of two uppercase letters, so EN for English and SV for Swedish.
 	
-``--dlang <language code>``
+--dlang <language code>
 
-	Mandatory argument, language the word and examples will be translated to. Values as in ``--slang``.
+Mandatory argument, language the word and examples will be translated to. Values as in --slang.
 	
-``--example``
+--example
 
-	Procide examples of usage. If ``--trans`` is specified, translation of those examples will also be provided.
+Procide examples of usage. If --trans is specified, translation of those examples will also be provided.
 	
-``--trans``
+--trans
 
-	Translate the word.
+Translate the word.
 	
-``--grammar``
+--grammar
 
-	Provide available grammar information about the word.
+Provide available grammar information about the word.
 
 ## vetero
 Command providing weather information. It uses data from OpenWeatherMap (openweathermap.org).
 
-``--loc <city>``
+--loc <city>
 
-	Mandatory argument, location for the weather information.
+Mandatory argument, location for the weather information.
 	
-``--time <value>``
+--time <value>
 
 	Mandatory argument, time for with weather information is queried. value = -1 indicates query about current weather. Otherwise it should be a UNIX timestamp.
 	
-``--temp``
+--temp
 
-	Provide information about the temperature.
+Provide information about the temperature.
 	
-``--precip``
+--precip
 
-	Provide information about precipitation.
+Provide information about precipitation.
 	
-``--cloud``
+--cloud
 
-	Provide information about cloudiness.
+Provide information about cloudiness.
 	
-``--sunrise`` and ``--sunset``
+--sunrise and --sunset
 
-	Provide information about sunrise and sunset accordingly. Takes effect only with ``--time value = -1.
+Provide information about sunrise and sunset accordingly. Takes effect only with --time value = -1.
 	
-``--wind``
+--wind
 
-	Provide information about the wind.
+Provide information about the wind.
 	
-``--duration``
+--duration
 
-	Meaningful only for positive ``--time values, length of the period of time for which information is requested in hours.
+Meaningful only for positive --time values, length of the period of time for which information is requested in hours.
 	
-``--desc``
+--desc
 
-	Provide weather description.
+Provide weather description.
