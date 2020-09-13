@@ -44,7 +44,7 @@ Mandatory argument, location for the weather information.
 	
 --time <value>
 
-	Mandatory argument, time for with weather information is queried. value = -1 indicates query about current weather. Otherwise it should be a UNIX timestamp.
+Mandatory argument, time for with weather information is queried. value = -1 indicates query about current weather. Otherwise it should be a UNIX timestamp.
 	
 --temp
 
